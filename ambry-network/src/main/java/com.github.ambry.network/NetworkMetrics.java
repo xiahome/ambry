@@ -174,9 +174,10 @@ class ServerNetworkMetrics extends NetworkMetrics {
   public final Counter processorShutDownErrorCount;
   public final Counter processNewResponseErrorCount;
   public Gauge<Integer> numberOfProcessorThreads;
+  public Gauge<Integer> numberOfAcceptorThreads;
 
   public ServerNetworkMetrics(final SocketRequestResponseChannel channel, MetricRegistry registry,
-      final List<Processor> processorThreads) {
+      final List<Processor> processorThreads, final List<Acceptor> acceptorThreads) {
     super(registry);
     requestQueueSize = new Gauge<Integer>() {
       @Override
@@ -204,7 +205,14 @@ class ServerNetworkMetrics extends NetworkMetrics {
         return getLiveThreads(processorThreads);
       }
     };
+    numberOfAcceptorThreads = new Gauge<Integer>() {
+      @Override
+      public Integer getValue() {
+        return getLiveThreads(acceptorThreads);
+      }
+    };
     registry.register(MetricRegistry.name(SocketServer.class, "NumberOfProcessorThreads"), numberOfProcessorThreads);
+    registry.register(MetricRegistry.name(SocketServer.class, "NumberOfAcceptorThreads"), numberOfAcceptorThreads);
 
     acceptConnectionErrorCount =
         registry.counter(MetricRegistry.name(SocketServer.class, "AcceptConnectionErrorCount"));
@@ -216,9 +224,9 @@ class ServerNetworkMetrics extends NetworkMetrics {
         registry.counter(MetricRegistry.name(SocketServer.class, "ProcessNewResponseErrorCount"));
   }
 
-  private int getLiveThreads(List<Processor> replicaThreads) {
+  private int getLiveThreads(List<? extends AbstractServerThread> replicaThreads) {
     int count = 0;
-    for (Processor thread : replicaThreads) {
+    for (AbstractServerThread thread : replicaThreads) {
       if (thread.isRunning()) {
         count++;
       }
