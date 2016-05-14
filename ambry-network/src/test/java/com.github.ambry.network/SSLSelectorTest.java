@@ -218,15 +218,14 @@ public class SSLSelectorTest {
 
   /* connect and wait for the connection to complete */
   private String blockingSSLConnect()
-      throws IOException {
+      throws IOException, Exception {
     String connectionId =
         selector.connect(new InetSocketAddress("localhost", server.port), BUFFER_SIZE, BUFFER_SIZE, PortType.SSL);
     while (!selector.connected().contains(connectionId)) {
-      selector.poll(10000L);
+      selector.poll(100L);
     }
-    //finish the handshake as well
-    while (!selector.isChannelReady(connectionId)) {
-      selector.poll(10000L);
+    if (!selector.isChannelReady(connectionId)) {
+      throw new Exception("Should fail.");
     }
     return connectionId;
   }

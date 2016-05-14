@@ -72,6 +72,7 @@ public class Selector implements Selectable {
   private final List<NetworkReceive> completedReceives;
   private final List<String> disconnected;
   private final List<String> connected;
+  private final List<SSLTransmission> sslHandshakingTransmissions;
   private final Time time;
   private final NetworkMetrics metrics;
   private final AtomicLong IdGenerator;
@@ -90,6 +91,7 @@ public class Selector implements Selectable {
     this.completedReceives = new ArrayList<NetworkReceive>();
     this.connected = new ArrayList<String>();
     this.disconnected = new ArrayList<String>();
+    this.sslHandshakingTransmissions = new ArrayList<SSLTransmission>();
     this.metrics = metrics;
     this.IdGenerator = new AtomicLong(0);
     this.activeConnections = new AtomicLong(0);
@@ -291,6 +293,7 @@ public class Selector implements Selectable {
       throws IOException {
     clear();
 
+    prepareSslHandshake();
     // register for write interest on any new sends
     if (sends != null) {
       for (NetworkSend networkSend : sends) {
@@ -315,13 +318,17 @@ public class Selector implements Selectable {
         Transmission transmission = getTransmission(key);
         try {
           if (key.isConnectable()) {
-            handleConnect(key, transmission);
+            transmission.finishConnect();
           }
 
-          /* if channel is not ready, finish prepare */
-          if (transmission.isConnected() && !transmission.ready()) {
+          /* if channel is not ready, it must be an SSL connection, finish prepare */
+          if (!transmission.ready()) {
             transmission.prepare();
+            sslHandshakingTransmissions.add((SSLTransmission)transmission);
             break;
+          } else {
+            connected.add(transmission.getConnectionId());
+            metrics.selectorConnectionCreated.inc();
           }
 
           if (key.isReadable() && transmission.ready()) {
@@ -399,6 +406,19 @@ public class Selector implements Selectable {
 
   public long getActiveConnections() {
     return activeConnections.get();
+  }
+
+  private void prepareSslHandshake()
+      throws IOException {
+    Iterator<SSLTransmission> itr = sslHandshakingTransmissions.iterator();
+    while (itr.hasNext()) {
+      SSLTransmission sslTransmission = itr.next();
+      if (sslTransmission.isConnected() && sslTransmission.ready()) {
+        connected.add(sslTransmission.getConnectionId());
+        metrics.selectorConnectionCreated.inc();
+        itr.remove();
+      }
+    }
   }
 
   /**
@@ -489,8 +509,8 @@ public class Selector implements Selectable {
   private void handleConnect(SelectionKey key, Transmission transmission)
       throws IOException {
     transmission.finishConnect();
-    this.connected.add(transmission.getConnectionId());
-    this.metrics.selectorConnectionCreated.inc();
+    //this.connected.add(transmission.getConnectionId());
+    //this.metrics.selectorConnectionCreated.inc();
   }
 
   /**
