@@ -145,6 +145,7 @@ class PerfNioServer implements NioServer {
         } catch (Exception e) {
           callback.onCompletion(null, e);
         }
+        //i++;
       }
       long totalRunTimeInMs = System.currentTimeMillis() - startTime;
       logger.info("LoadCreator executed for approximately {} s and sent {} requests ({} requests/sec)",

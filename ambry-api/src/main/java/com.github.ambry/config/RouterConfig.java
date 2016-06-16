@@ -148,10 +148,10 @@ public class RouterConfig {
     routerRequestTimeoutMs = verifiableProperties.getInt("router.request.timeout.ms", 2000);
     routerMaxPutChunkSizeBytes = verifiableProperties.getInt("router.max.put.chunk.size.bytes", 4 * 1024 * 1024);
     routerPutRequestParallelism = verifiableProperties.getInt("router.put.request.parallelism", 3);
-    routerPutSuccessTarget = verifiableProperties.getInt("router.put.success.target", 2);
+    routerPutSuccessTarget = verifiableProperties.getInt("router.put.success.target", 1);
     routerMaxSlippedPutAttempts = verifiableProperties.getInt("router.max.slipped.put.attempts", 1);
     routerDeleteRequestParallelism = verifiableProperties.getInt("router.delete.request.parallelism", 12);
-    routerDeleteSuccessTarget = verifiableProperties.getInt("router.delete.success.target", 2);
+    routerDeleteSuccessTarget = verifiableProperties.getInt("router.delete.success.target", 1);
     routerGetRequestParallelism = verifiableProperties.getInt("router.get.request.parallelism", 2);
     routerGetSuccessTarget = verifiableProperties.getInt("router.get.success.target", 1);
     routerGetCrossDcEnabled = verifiableProperties.getBoolean("router.get.cross.dc.enabled", true);

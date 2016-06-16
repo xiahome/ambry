@@ -83,6 +83,7 @@ public class NonBlockingRouterMetrics {
   public final Histogram operationControllerSendAndPollTimeMs;
   public final Histogram operationControllerProcessResponseTimeMs;
   public final Histogram operationControllerOnePollCycleTimeMs;
+  public final Histogram requestInfoCounter;
 
   // ChunkFiller performance metrics.
   public final Meter chunkFillerSleepRate;
@@ -184,6 +185,8 @@ public class NonBlockingRouterMetrics {
         metricRegistry.histogram(MetricRegistry.name(PutManager.class, "OperationControllerProcessResponseTimeMs"));
     operationControllerOnePollCycleTimeMs =
         metricRegistry.histogram(MetricRegistry.name(PutManager.class, "OperationControllerOneCycleTimeMs"));
+    requestInfoCounter =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "RequestInfoCounter"));
 
     // ChunkFiller performance metrics.
     chunkFillerSleepRate = metricRegistry.meter(MetricRegistry.name(NonBlockingRouter.class, "ChunkFillerSleepRate"));

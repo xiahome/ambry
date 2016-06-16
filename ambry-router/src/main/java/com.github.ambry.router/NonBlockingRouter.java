@@ -485,6 +485,7 @@ class NonBlockingRouter implements Router {
           routerMetrics.operationControllerPollforRequestTimeMs.update(time.milliseconds() - lastTime);
           lastTime = time.milliseconds();
           List<ResponseInfo> responseInfoList = networkClient.sendAndPoll(requestInfoList);
+          routerMetrics.requestInfoCounter.update(requestInfoList.size());
           routerMetrics.operationControllerSendAndPollTimeMs.update(time.milliseconds() - lastTime);
           lastTime = time.milliseconds();
           onResponse(responseInfoList);

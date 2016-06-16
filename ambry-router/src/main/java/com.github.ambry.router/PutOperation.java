@@ -621,11 +621,13 @@ class PutOperation {
     /**
      * Do the actions required when the chunk has been completely built.
      */
-    void onFillComplete() {
+    void onFillComplete(boolean isDataChunk) {
       buf.flip();
       prepareForSending();
-      routerMetrics.chunkFillerFillingChunkTimeMs.update(time.milliseconds() - timeStartFillingCurrentChunkMs);
-      timeFilledPreviousChunkMs = time.milliseconds();
+      if(isDataChunk) {
+        routerMetrics.chunkFillerFillingChunkTimeMs.update(time.milliseconds() - timeStartFillingCurrentChunkMs);
+        timeFilledPreviousChunkMs = time.milliseconds();
+      }
     }
 
     /**
@@ -645,7 +647,7 @@ class PutOperation {
         buf.put(channelReadBuffer);
       }
       if (!buf.hasRemaining()) {
-        onFillComplete();
+        onFillComplete(true);
       }
       return toWrite;
     }
@@ -936,7 +938,7 @@ class PutOperation {
       chunksDone++;
       if (chunksDone == numDataChunks) {
         buf = MetadataContentSerDe.serializeMetadataContent(Arrays.asList(chunkIds));
-        onFillComplete();
+        onFillComplete(false);
       }
     }
 
