@@ -78,6 +78,23 @@ public class NonBlockingRouterMetrics {
   public final Counter errorCountOnRouterClose;
   public final Counter unknownErrorCountForOperation;
 
+  // Operation Controller performance metrics.
+  public final Histogram operationControllerPollforRequestTimeMs;
+  public final Histogram operationControllerSendAndPollTimeMs;
+  public final Histogram operationControllerProcessResponseTimeMs;
+  public final Histogram operationControllerOnePollCycleTimeMs;
+
+  // ChunkFiller performance metrics.
+  public final Meter chunkFillerSleepRate;
+  public final Histogram chunkFillerOneCycleProcessingTimeMs;
+  public final Histogram chunkFillerWaitingTrunkTimeMs;
+  public final Histogram chunkFillerFillingChunkTimeMs;
+
+  // Prformance metrics for operation managers.
+  public final Histogram putManagerPollTimeMs;
+  public final Histogram getManagerPollTimeMs;
+  public final Histogram deleteManagerPollTimeMs;
+
   // Misc metrics.
   public final Meter operationErrorRate;
   public final Counter slippedPutSuccessCount;
@@ -153,9 +170,37 @@ public class NonBlockingRouterMetrics {
         metricRegistry.counter(MetricRegistry.name(NonBlockingRouter.class, "BlobExpiredErrorCount"));
     unknownReplicaResponseError =
         metricRegistry.counter(MetricRegistry.name(NonBlockingRouter.class, "UnknownReplicaResponseError"));
-    errorCountOnRouterClose = metricRegistry.counter(MetricRegistry.name(NonBlockingRouter.class, "ErrorCountOnRouterClose"));
+    errorCountOnRouterClose =
+        metricRegistry.counter(MetricRegistry.name(NonBlockingRouter.class, "ErrorCountOnRouterClose"));
     unknownErrorCountForOperation =
         metricRegistry.counter(MetricRegistry.name(NonBlockingRouter.class, "UnknownErrorCountForOperation"));
+
+    // Operation Controller performance metrics.
+    operationControllerPollforRequestTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "OperationControllerPollforRequestTimeMs"));
+    operationControllerSendAndPollTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "OperationControllerSendAndPollTimeMs"));
+    operationControllerProcessResponseTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "OperationControllerProcessResponseTimeMs"));
+    operationControllerOnePollCycleTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "OperationControllerOneCycleTimeMs"));
+
+    // ChunkFiller performance metrics.
+    chunkFillerSleepRate = metricRegistry.meter(MetricRegistry.name(NonBlockingRouter.class, "ChunkFillerSleepRate"));
+    chunkFillerOneCycleProcessingTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "ChunkFillerOneCycleTime"));
+    // The time for a chunk filler to wait for a chunk to become available to fill.
+    chunkFillerWaitingTrunkTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "ChunkFillerWaitingTrunkTimeMs"));
+    // The time for a chunk filler to fill a chunk.
+    chunkFillerFillingChunkTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(PutManager.class, "ChunkFillerFillingChunkTimeMs"));
+
+    // Prformance metrics for operation managers.
+    putManagerPollTimeMs = metricRegistry.histogram(MetricRegistry.name(PutManager.class, "PutManagerPollTimeMs"));
+    getManagerPollTimeMs = metricRegistry.histogram(MetricRegistry.name(GetManager.class, "GetManagerPollTimeMs"));
+    deleteManagerPollTimeMs =
+        metricRegistry.histogram(MetricRegistry.name(DeleteManager.class, "DeleteManagerPollTimeMs"));
 
     // Misc metrics.
     operationErrorRate =

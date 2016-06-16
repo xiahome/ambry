@@ -14,7 +14,6 @@
 package com.github.ambry.router;
 
 import com.github.ambry.clustermap.ClusterMap;
-import com.github.ambry.clustermap.DataNodeId;
 import com.github.ambry.clustermap.PartitionId;
 import com.github.ambry.clustermap.ReplicaId;
 import com.github.ambry.commons.BlobId;
@@ -99,6 +98,10 @@ class PutOperation {
   private PutChunk chunkToFill;
   // counter for tracking the chunks being filled.
   private int chunkCounter;
+  // The start time to fill the current chunk.
+  private long timeStartFillingCurrentChunkMs;
+  // The time that the previous chunk was completely filled.
+  private long timeFilledPreviousChunkMs;
   // the current ByteBuffer/position in the chunkFillerChannel.
   private ByteBuffer channelReadBuffer;
   // denotes whether chunk filling is complete.
@@ -166,6 +169,7 @@ class PutOperation {
     this.futureResult = futureResult;
     this.callback = callback;
     this.time = time;
+    timeFilledPreviousChunkMs = time.milliseconds();
     bytesFilledSoFar = 0;
     chunkCounter = -1;
 
@@ -335,6 +339,8 @@ class PutOperation {
         chunkCounter++;
         chunk.prepareForBuilding(chunkCounter, getSizeOfChunkAt(chunkCounter));
         chunkToFill = chunk;
+        routerMetrics.chunkFillerWaitingTrunkTimeMs.update(time.milliseconds() - timeFilledPreviousChunkMs);
+        timeStartFillingCurrentChunkMs = time.milliseconds();
         break;
       }
     }
@@ -618,6 +624,8 @@ class PutOperation {
     void onFillComplete() {
       buf.flip();
       prepareForSending();
+      routerMetrics.chunkFillerFillingChunkTimeMs.update(time.milliseconds() - timeStartFillingCurrentChunkMs);
+      timeFilledPreviousChunkMs = time.milliseconds();
     }
 
     /**
