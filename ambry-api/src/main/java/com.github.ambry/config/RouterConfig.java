@@ -140,7 +140,7 @@ public class RouterConfig {
     routerHostname = verifiableProperties.getString("router.hostname");
     routerDatacenterName = verifiableProperties.getString("router.datacenter.name");
     routerScalingUnitMaxConnectionsPerPortPlainText =
-        verifiableProperties.getIntInRange("router.scaling.unit.max.connections.per.port.plain.text", 5, 1, 20);
+        verifiableProperties.getIntInRange("router.scaling.unit.max.connections.per.port.plain.text", 20, 1, 20);
     routerScalingUnitMaxConnectionsPerPortSsl =
         verifiableProperties.getIntInRange("router.scaling.unit.max.connections.per.port.ssl", 2, 1, 20);
     routerConnectionCheckoutTimeoutMs =
@@ -148,10 +148,10 @@ public class RouterConfig {
     routerRequestTimeoutMs = verifiableProperties.getInt("router.request.timeout.ms", 2000);
     routerMaxPutChunkSizeBytes = verifiableProperties.getInt("router.max.put.chunk.size.bytes", 4 * 1024 * 1024);
     routerPutRequestParallelism = verifiableProperties.getInt("router.put.request.parallelism", 3);
-    routerPutSuccessTarget = verifiableProperties.getInt("router.put.success.target", 2);
+    routerPutSuccessTarget = verifiableProperties.getInt("router.put.success.target", 1);
     routerMaxSlippedPutAttempts = verifiableProperties.getInt("router.max.slipped.put.attempts", 1);
     routerDeleteRequestParallelism = verifiableProperties.getInt("router.delete.request.parallelism", 12);
-    routerDeleteSuccessTarget = verifiableProperties.getInt("router.delete.success.target", 2);
+    routerDeleteSuccessTarget = verifiableProperties.getInt("router.delete.success.target", 1);
     routerGetRequestParallelism = verifiableProperties.getInt("router.get.request.parallelism", 2);
     routerGetSuccessTarget = verifiableProperties.getInt("router.get.success.target", 1);
     routerGetCrossDcEnabled = verifiableProperties.getBoolean("router.get.cross.dc.enabled", true);
